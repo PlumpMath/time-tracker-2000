@@ -17,6 +17,7 @@
                (varchar :email 500 :not-null)
                (varchar :abn 500)
                (varchar :phone 500)
+               (varchar :title 500)
                (varchar :address 500))))
   (drop [] (drop (table :clients))))
 
@@ -30,10 +31,11 @@
 
 (defmigration add-hours-table
   (up [] (create
-          (table :hours
+          (tbl :hours
                (integer :hour)
                (integer :rate)
                (timestamp :date)
+               (varchar :description 500)
                (refer-to :jobs)
                (refer-to :members))))
   (down [] (drop (table :hours))))

@@ -22,9 +22,14 @@
   (has-one jobs {:fk :id})
   (has-one members {:fk :id}))
 
-(defn get-query [entity s l & f]
+(defn get-query [entity l s & args]
   "Entity, skip, limit & fields"
-  (select entity
-          (fields f)
-          (limit l)
-          (offset s)))
+  (->
+   (select* entity)
+   (limit l)
+   (offset s)
+   (#(apply fields % args))
+   (exec)))
+
+(defn add-to-db [entity vals]
+  (insert entity (values vals)))
