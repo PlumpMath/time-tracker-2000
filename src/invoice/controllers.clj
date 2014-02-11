@@ -15,12 +15,30 @@
          {:name "jobs"
           :results (db/get-query db/jobs 10 0 :id :name :description)}])))
 
-(defn log-hours-form [a]
-  "Constructs the form for logging hours"
+(defn add-client-view [a]
+  "Builds the view for adding new clients"
+  (views/render
+   (list (views/title "Add clients")
+         (views/build-form "n" "post" "/clients"
+                           (build-form-input :name)
+                           (build-form-input :email)
+                           (build-form-input :abn)
+                           (build-form-input :phone)
+                           (build-form-input :address)))))
+
+(defn add-member-view [a]
+  "Builds the view for adding new members to the team"
+  (views/render
+   (list (views/title "Add hours")
+         (views/build-form "n" "post" "/members"
+                           (build-form-input :name)))))
+
+(defn log-hours-view [a]
+  "Constructs the view for logging hours"
   (let [jobs (db/get-query db/jobs -1 0 :name :id)
         members (db/get-query db/members -1 0 :name :id)]
     (views/render
-     (list [:h1 "Log Hours"]
+     (list (views/title "Add hours")
            (views/build-form "n" "post" "/hours"
                              (build-form-input :hour)
                              (build-form-input :rate)

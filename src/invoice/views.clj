@@ -2,6 +2,10 @@
   (:use hiccup.core hiccup.page hiccup.element
         [hiccup.middleware :only (wrap-base-url)]))
 
+(defn title [n]
+  "Creates a title"
+  [:h1 n])
+
 (defn build-overview-row [item]
   [:tr
    (for [[k v] item] [:td (str v)])
