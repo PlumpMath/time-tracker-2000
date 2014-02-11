@@ -29,9 +29,19 @@
 (defn add-member-view [a]
   "Builds the view for adding new members to the team"
   (views/render
-   (list (views/title "Add hours")
+   (list (views/title "Add Member")
          (views/build-form "n" "post" "/members"
                            (build-form-input :name)))))
+
+(defn add-job-view [a]
+  "Builds the view for adding new members to the team"
+  (let [clients (db/get-query db/jobs -1 0 :name :id)]
+    (views/render
+     (list (views/title "Add Job")
+           (views/build-form "n" "post" "/jobs"
+                             (build-form-input :name)
+                             (build-form-input :description)
+                             (build-form-form :client_id clients))))))
 
 (defn log-hours-view [a]
   "Constructs the view for logging hours"

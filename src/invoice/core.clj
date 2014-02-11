@@ -1,5 +1,5 @@
 (ns invoice.core
-  (:use compojure.core [invoice.db :as db]
+  (:use compojure.core [invoice.controllers :as controllers]
         ring.middleware.json ring.util.response)
   (:require [compojure.route :as route]
             [compojure.handler :as handler]))
@@ -8,11 +8,10 @@
 (defroutes my-routes
   (GET "/" [] dashboard)
 
-  (GET "/members/new" [] (build-form :members :name))
-  (GET "/clients/new" [] (build-form :clients :name :email :abn :phone :address))
-  (GET "/jobs/new" [] (build-form :jobs :name :description [:client_id db/clients]))
-
-  (GET "/hours/log" [] log-hours-form)
+  (GET "/members/new" [] (controllers/add-member-view))
+  (GET "/clients/new" [] (controllers/add-client-view))
+  (GET "/jobs/new" [] (controllers/add-job-view))
+  (GET "/hours/log" [] log-hours-view)
 
   (POST "/clients" [] add-clients)
   (POST "/hours" [] add-hours)
