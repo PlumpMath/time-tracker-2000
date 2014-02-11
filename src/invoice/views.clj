@@ -6,28 +6,30 @@
   "Creates a title"
   [:h1 n])
 
-(defn build-overview-row [item]
+(defn overview-table-row [item]
   [:tr
    (for [[k v] item] [:td (str v)])
    [:td
     [:a {:href (str "/delete")} "X"]]])
 
-(defn build-overview-table [items]
+(defn overview-table [items]
+  "Builds the table for the dashboard"
   [:table {:style "width:100%"}
    [:thead
     [:tr
      (for [[k v] (first items)] [:th (name k)])
      [:td "Delete"]]]
    [:tbody
-    (map build-overview-row items)]])
+    (map overview-table-row items)]])
 
-(defn overview-html [table]
+(defn overview [table]
   [(keyword (str "div#" (:name table)))
    (list
     [:h3 (:name table)]
     (if (empty? (:results table))
       [:p "empty"]
-      (build-overview-table (:results table)))
+      [(build-overview-table (:results table))
+       [:a {:href (str "/" (:name table) "s/list")} "Show more..."]])
     [:hr])])
 
 (def head

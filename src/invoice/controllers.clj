@@ -2,20 +2,20 @@
   (:use [invoice.db :as db]
         [invoice.views :as views]))
 
-(defn dashboard [a]
+(defn dashboard [req]
   "Renders the dashboard page"
   (views/render
-   (map views/overview-html
+   (map views/overview
         [{:name "hours"
-           :results (db/get-query db/hours 10 0 :id :hour :rate :date :description)}
+           :results (db/find-all db/hours 10 0 :id :hour :rate :date :description)}
          {:name "clients"
-           :results (db/get-query db/clients 10 0 :id :email :name)}
+           :results (db/find-all db/clients 10 0 :id :email :name)}
          {:name "members"
-          :results (db/get-query db/members 10 0 :id :name)}
+          :results (db/find-all db/members 10 0 :id :name)}
          {:name "jobs"
-          :results (db/get-query db/jobs 10 0 :id :name :description)}])))
+          :results (db/find-all db/jobs 10 0 :id :name :description)}])))
 
-(defn add-client-view [a]
+(defn add-client-view [req]
   "Builds the view for adding new clients"
   (views/render
    (list (views/title "Add clients")
@@ -26,14 +26,14 @@
                            (build-form-input :phone)
                            (build-form-input :address)))))
 
-(defn add-member-view [a]
+(defn add-member-view [req]
   "Builds the view for adding new members to the team"
   (views/render
    (list (views/title "Add Member")
          (views/build-form "n" "post" "/members"
                            (build-form-input :name)))))
 
-(defn add-job-view [a]
+(defn add-job-view [req]
   "Builds the view for adding new members to the team"
   (let [clients (db/get-query db/jobs -1 0 :name :id)]
     (views/render
@@ -43,10 +43,10 @@
                              (build-form-input :description)
                              (build-form-form :client_id clients))))))
 
-(defn log-hours-view [a]
+(defn log-hours-view [req]
   "Constructs the view for logging hours"
-  (let [jobs (db/get-query db/jobs -1 0 :name :id)
-        members (db/get-query db/members -1 0 :name :id)]
+  (let [jobs (db/find-all db/jobs -1 0 :name :id)
+        members (db/find-all db/members -1 0 :name :id)]
     (views/render
      (list (views/title "Add hours")
            (views/build-form "n" "post" "/hours"

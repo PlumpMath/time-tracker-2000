@@ -22,8 +22,8 @@
   (has-one jobs {:fk :id})
   (has-one members {:fk :id}))
 
-(defn get-query [entity l s & args]
-  "Entity, skip, limit & fields"
+(defn find-all [entity l s & args]
+  "Entity, limit, skip & fields"
   (->
    (select* entity)
    (limit l)

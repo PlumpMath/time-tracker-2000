@@ -4,14 +4,13 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]))
 
-
 (defroutes my-routes
   (GET "/" [] dashboard)
 
   (GET "/members/new" [] (controllers/add-member-view))
   (GET "/clients/new" [] (controllers/add-client-view))
   (GET "/jobs/new" [] (controllers/add-job-view))
-  (GET "/hours/log" [] log-hours-view)
+  (GET "/hours/log" [] (controllers/log-hours-view))
 
   (POST "/clients" [] add-clients)
   (POST "/hours" [] add-hours)
