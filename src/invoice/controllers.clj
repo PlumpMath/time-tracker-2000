@@ -20,28 +20,28 @@
   (views/render
    (list (views/title "Add clients")
          (views/build-form "n" "post" "/clients"
-                           (build-form-input :name)
-                           (build-form-input :email)
-                           (build-form-input :abn)
-                           (build-form-input :phone)
-                           (build-form-input :address)))))
+                           (views/build-form-input :name)
+                           (views/build-form-input :email)
+                           (views/build-form-input :abn)
+                           (views/build-form-input :phone)
+                           (views/build-form-input :address)))))
 
 (defn add-member-view [req]
   "Builds the view for adding new members to the team"
   (views/render
    (list (views/title "Add Member")
          (views/build-form "n" "post" "/members"
-                           (build-form-input :name)))))
+                           (views/build-form-input :name)))))
 
 (defn add-job-view [req]
   "Builds the view for adding new members to the team"
-  (let [clients (db/get-query db/jobs -1 0 :name :id)]
+  (let [clients (db/find-all db/jobs 0 0 :id :name)]
     (views/render
      (list (views/title "Add Job")
            (views/build-form "n" "post" "/jobs"
-                             (build-form-input :name)
-                             (build-form-input :description)
-                             (build-form-form :client_id clients))))))
+                             (views/build-form-input :name)
+                             (views/build-form-input :description)
+                             (views/build-form-select :client_id clients))))))
 
 (defn log-hours-view [req]
   "Constructs the view for logging hours"
@@ -50,13 +50,12 @@
     (views/render
      (list (views/title "Add hours")
            (views/build-form "n" "post" "/hours"
-                             (build-form-input :hour)
-                             (build-form-input :rate)
-                             (build-form-input :date)
-                             (build-form-input :date)
-                             (build-form-select :member_id members)
-                             (build-form-select :job_id jobs)
-                             (build-form-select "Log"))))))
+                             (views/build-form-input :hour)
+                             (views/build-form-input :rate)
+                             (views/build-form-input :date)
+                             (views/build-form-input :date)
+                             (views/build-form-select :member_id members)
+                             (views/build-form-select :job_id jobs))))))
 
 (defn add-hours [req]
   "Logs new hours to the database"

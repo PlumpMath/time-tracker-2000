@@ -28,8 +28,9 @@
     [:h3 (:name table)]
     (if (empty? (:results table))
       [:p "empty"]
-      [(build-overview-table (:results table))
-       [:a {:href (str "/" (:name table) "s/list")} "Show more..."]])
+      (list
+       (overview-table (:results table))
+       [:a {:href (str "/" (:name table) "s/list")} "Show more..."]))
     [:hr])])
 
 (def head
@@ -73,12 +74,12 @@
              [:div {:class "large-12 columns"} body]]
             (javascript-tag "$(document).foundation()"))]]))
 
-(defn build-form-input [n type]
+(defn build-form-input [n]
   "Builds a input box.  n: input name, type: input type"
   [:div {:class "row"}
    [:div {:class "large-4 columns"}
-    [:label]
-    [:input {:type type
+    [:label (name n)]
+    [:input {:type "text"
              :name (name n)}]]])
 
 (defn build-form-submit [v]
@@ -93,7 +94,8 @@
   "Builds a select box. n: select name, options: select options"
   [:div {:class "row"}
    [:div {:class "large-4 columns"}
-    [:label {:name (name n)}]
+    [:h1 (str options)]
+    [:label {:name (name n)} (name n)]
     [:select {:name (name n)}
      (map (fn [option]
             [:option {:value (:id option)} (:name option)]) options)]]])
