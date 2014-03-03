@@ -52,14 +52,14 @@
      [:li {:class "active"}
       [:a {:href "/"} "Dashboard"]]
      [:li {:class "has-dropdown"}
-      [:a {:href "#"} "New"]
+      [:a {:href "#"} "Add"]
       [:ul {:class "dropdown"}
        [:li
         [:a {:href "/members/new"} "Member"]
         [:a {:href "/clients/new"} "Client"]
-        [:a {:href "/jobs/new"} "Job"]]]]
-     [:li
-      [:a {:href "/hours/log"} "Log Hours"]]
+        [:a {:href "/jobs/new"} "Job"]
+        [:a {:href "/expenses/new"} "Expnese"]
+        [:a {:href "/hours/new"} "Hours"]]]]
      [:li
       [:a {:href "/buid_pdf"} "PDF"]]]]])
 
@@ -74,13 +74,14 @@
              [:div {:class "large-12 columns"} body]]
             (javascript-tag "$(document).foundation()"))]]))
 
-(defn build-form-input [n k]
-  "Builds a input box.  n: input name, type: input type"
+(defn build-form-input [n k & v]
+  "Builds a input box.  name, key and value"
   [:div {:class "row"}
    [:div {:class "large-4 columns"}
     [:label n]
     [:input {:type "text"
-             :name (name k)}]]])
+             :name (name k)
+             :value (str (first v))}]]])
 
 (defn build-form-submit [v]
   "Builds a submit button. v: submit value"
@@ -90,7 +91,7 @@
              :type "submit"
              :value v}]]])
 
-(defn build-form-select [n k options]
+(defn build-form-select [n k options & v]
   "Builds a select box. n: select name, options: select options"
   [:div {:class "row"}
    [:div {:class "large-4 columns"}
@@ -99,9 +100,9 @@
      (map (fn [option]
             [:option {:value (:id option)} (:name option)]) options)]]])
 
-(defn build-form [n method action & inputs]
+(defn build-form [method action & inputs]
   "Builds a form."
-  [:form {:method method :action action :name n}
+  [:form {:method method :action action}
    (list
     inputs
     (build-form-submit "Submit"))])

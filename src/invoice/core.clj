@@ -5,18 +5,31 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]))
 
+(defn foo [req & {:as params}]
+  (println (:id (:params req)))
+  (println params)
+  (str "foo"))
+
 (defroutes my-routes
   (GET "/" [] dashboard)
 
-  (GET "/members/new" [] controllers/add-member-view)
-  (GET "/clients/new" [] controllers/add-client-view)
-  (GET "/jobs/new" [] controllers/add-job-view)
-  (GET "/hours/log" [] controllers/log-hours-view)
+  (GET "/members/new" [] controllers/get-members)
+  (GET "/clients/new" [] controllers/get-clients)
+  (GET "/jobs/new" [] controllers/get-jobs)
+  (GET "/expenses/new" [] controllers/get-expenses)
+  (GET "/hours/new" [] controllers/get-hours)
 
   (POST "/clients" [] controllers/add-clients)
   (POST "/hours" [] controllers/add-hours)
   (POST "/jobs" [] controllers/add-jobs)
   (POST "/members" [] controllers/add-members)
+  (POST "/expenses" [] controllers/add-expenses)
+
+  (GET "/members/:id" [id] controllers/get-members)
+  (GET "/clients/:id" [id] controllers/get-clients)
+  (GET "/jobs/:id" [id] controllers/get-jobs)
+  (GET "/expenses/:id" [id] controllers/get-expenses)
+  (GET "/hours/:id" [id] controllers/get-hours)
 
   ;(GET "/pdf" [] build-pdf-form)
 

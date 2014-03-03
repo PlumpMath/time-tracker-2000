@@ -40,12 +40,12 @@
                (refer-to :members))))
   (down [] (drop (table :hours))))
 
-(defmigration add-expirations-table
+(defmigration add-expenses-table
   (up [] (create
-          (tbl :expirations
+          (tbl :expenses
                (integer :price)
                (integer :quantity)
                (varchar :description 500)
                (date :date)
                (refer-to :jobs))))
-  (down [] (drop (table :expirations))))
+  (down [] (drop (table :expenses))))
