@@ -9,7 +9,8 @@
                  [com.h2database/h2 "1.3.170"]
                  [compojure "1.1.6"]
                  [ring/ring-json "0.2.0"]
-                 [hiccup "1.0.4"]]
+                 [hiccup "1.0.4"]
+                 [clj-time "0.6.0"]]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler invoice.core/app}
   :profiles

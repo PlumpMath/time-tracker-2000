@@ -13,18 +13,18 @@
 (defmigration add-clients-table
   (up [] (create
           (tbl :clients
-               (varchar :name 500 :not-null)
-               (varchar :email 500 :not-null)
-               (varchar :abn 500)
-               (varchar :phone 500)
-               (varchar :title 500)
+               (varchar :name 100 :not-null)
+               (varchar :email 100 :not-null)
+               (varchar :abn 50)
+               (varchar :phone 20)
+               (varchar :title 200)
                (varchar :address 500))))
   (drop [] (drop (table :clients))))
 
 (defmigration add-jobs-table
   (up [] (create
           (tbl :jobs
-               (varchar :name 500)
+               (varchar :name 100)
                (varchar :description 500)
                (refer-to :clients))))
   (down [] (drop (table :jobs))))
@@ -34,8 +34,18 @@
           (tbl :hours
                (integer :hour)
                (integer :rate)
-               (timestamp :date)
+               (date :date)
                (varchar :description 500)
                (refer-to :jobs)
                (refer-to :members))))
   (down [] (drop (table :hours))))
+
+(defmigration add-expirations-table
+  (up [] (create
+          (tbl :expirations
+               (integer :price)
+               (integer :quantity)
+               (varchar :description 500)
+               (date :date)
+               (refer-to :jobs))))
+  (down [] (drop (table :expirations))))

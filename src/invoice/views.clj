@@ -74,13 +74,13 @@
              [:div {:class "large-12 columns"} body]]
             (javascript-tag "$(document).foundation()"))]]))
 
-(defn build-form-input [n]
+(defn build-form-input [n k]
   "Builds a input box.  n: input name, type: input type"
   [:div {:class "row"}
    [:div {:class "large-4 columns"}
-    [:label (name n)]
+    [:label n]
     [:input {:type "text"
-             :name (name n)}]]])
+             :name (name k)}]]])
 
 (defn build-form-submit [v]
   "Builds a submit button. v: submit value"
@@ -90,13 +90,12 @@
              :type "submit"
              :value v}]]])
 
-(defn build-form-select [n options]
+(defn build-form-select [n k options]
   "Builds a select box. n: select name, options: select options"
   [:div {:class "row"}
    [:div {:class "large-4 columns"}
-    [:h1 (str options)]
-    [:label {:name (name n)} (name n)]
-    [:select {:name (name n)}
+    [:label n]
+    [:select {:name (name k)}
      (map (fn [option]
             [:option {:value (:id option)} (:name option)]) options)]]])
 

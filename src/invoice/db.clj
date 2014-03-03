@@ -22,10 +22,10 @@
   (has-one jobs {:fk :id})
   (has-one members {:fk :id}))
 
-(defn apply-limit [l]
-  (if (= -1 l)
-    nil
-    (limit l)))
+(defentity expenses
+  (table :expenses)
+  (database h2-db)
+  (has-one jobs {:fk :id}))
 
 (defn find-all [entity l s & args]
   "Entity, limit, skip & fields"
