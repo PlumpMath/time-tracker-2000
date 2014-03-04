@@ -1,14 +1,8 @@
-# invoice
+time_tracker_2000
+=================
 
-A Clojure library designed to ... well, that part is up to you.
+Compojure app to manage time spent on jobs. Uses Latex to spit out pretty invoices
 
-## Usage
+TODO: 
 
-FIXME
-
-## License
-
-Copyright © 2013 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+* Generate pretty PDFs
