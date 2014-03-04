@@ -12,12 +12,12 @@
     [:ul {:class "pagination"}
      (if (not (nil? prev-page))
        [:li
-        [:a {:href (str n "/list?page=" prev-page "&per_page=" per-page)
+        [:a {:href (str n "?page=" prev-page "&per_page=" per-page)
              :class "arrow"} "&laquo;"]]
        [:li
         [:a {:class "unavailable arrow"} "&laquo;"]])
      [:li
-      [:a {:href (str n "/list?page=" next-page "&per_page=" per-page)
+      [:a {:href (str n "?page=" next-page "&per_page=" per-page)
            :class "arrow"} "&raquo;"]]]))
 
 (defn overview-table-row [item n]
@@ -38,7 +38,7 @@
 
 (defn overview [context table]
   (list [:h3
-         [:a {:href (str context "/list")} context]]
+         [:a {:href (str context)} context]]
         (if (empty? table)
           [:p "empty"]
           (overview-table table context))))
@@ -70,7 +70,7 @@
        [:li [:a {:href "/expenses/new"} "Expnese"]]
        [:li [:a {:href "/hours/new"} "Hours"]]]]
      [:li
-      [:a {:href "/buid_pdf"} "PDF"]]]]])
+      [:a {:href "/pdf"} "PDF"]]]]])
 
 (defn render [body]
   "Renders the main view"
@@ -111,9 +111,34 @@
              [:option {:value (:id %)} (:name %)])
           options)]]])
 
+(defn build-form-textarea [n k & v]
+  [:div {:class "row"}
+   [:div {:class "large-4 columns"}
+    [:label n]
+    [:textarea {:name (name k)
+             :value (str (first v))}]]])
+
 (defn build-form [method action & inputs]
   "Builds a form."
   [:form {:method method :action action}
    (list
     inputs
     (build-form-submit "Submit"))])
+
+(defn build-pdf-form [jobs members]
+  "Builds the form for generating invoices"
+  (list
+   [:h2 "Generate invoice"]
+   [:hr]
+   [:form {:method "post" :action "/pdf"}
+    [:h3 "Invoice details"]
+    (build-form-input "Title" "title")
+    (build-form-textarea "Notes" "notes")
+    [:h3 "Invoice between"]
+    (build-form-input "From (DD/MM/YYYY)" "from")
+    (build-form-input "To (DD/MM/YYYY)" "to")
+    [:h3 "Invoice To"]
+    (build-form-select "Job" "job_id" jobs)
+    [:h3 "Invoice From"]
+    (build-form-select "Member" "member_id" members)
+    (build-form-submit "Generate")]))

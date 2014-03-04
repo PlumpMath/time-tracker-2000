@@ -31,14 +31,18 @@
   (database h2-db)
   (has-one jobs {:fk :id}))
 
-(:rel entity-fields expenses)
-
 ;; Schemas for each entity. Used to build crud forms etc
 ;;   type: the type (string, integer, date or relationship)
 ;;   refers: the entity the relationship refers to
 ;;   name: the name of the field
 (def member-schema
-  {:name {:type :string :name "Name"}})
+  {:name {:type :string :name "Name"}
+   :email {:type :string :name "Email"}
+   :address {:type :string :name "Address"}
+   :abn {:type :string :name "ABN"}
+   :bank_branch {:type :string :name "Bank"}
+   :bank_bsb {:type :string :name "Account BSB"}
+   :bank_number {:type :string :name "Account Number"}})
 
 (def client-schema
   {:name {:type :string :name "Name"}
@@ -64,6 +68,7 @@
   {:price {:type :integer :name "Price"}
    :quantity {:type :integer :name "Quantity"}
    :description {:type :string :name "Description"}
+   :date {:type :date :name "Date"}
    :job_id {:type :relationship :refers jobs :name "Job"}})
 
 (defn find-all [entity l s & args]
@@ -72,11 +77,15 @@
    (select* entity)
    (limit l)
    (offset s)
+   (order :created_on :DESC)
    (#(apply fields % (flatten args)))
    (exec)))
 
-(defn find-one [entity id]
-  (into {} (first ( select entity (where {:id id})))))
+(defn find-one [entity id & opts]
+  (first (->
+          (select* entity)
+          (where {:id id})
+          opts)))
 
 (defn add-to-db [id entity vals]
   "Upsert. If id is nil will create a new entry otherwise will update"

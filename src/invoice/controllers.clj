@@ -105,3 +105,14 @@
      (list
       (views/overview context results)
       (views/pagination context page l)))))
+
+(defn pdf-form [req]
+  (let [members (db/find-all db/members -1 0 :id :name)
+        jobs (db/find-all db/jobs -1 0 :id :name)]
+    (views/render
+     (views/build-pdf-form jobs members))))
+
+(defn mk-pdf [req]
+  (let [body (:params req)
+        member (db/find-one db/members (:member_id body))]
+    (str body)))

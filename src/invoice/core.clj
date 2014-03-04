@@ -7,10 +7,11 @@
             [compojure.handler :as handler]))
 
 (defmacro defcontroller [n entity schema & fields]
+  "Builds the routes for some crud"
   `(context ~n []
             (POST "/" [] #(controllers/post-form % ~entity ~schema))
             (POST "/:id" [] #(controllers/post-form % ~entity ~schema))
-            (GET "/list" [] #(controllers/get-list % ~entity [~@fields]))
+            (GET "/" [] #(controllers/get-list % ~entity [~@fields]))
             (GET "/new" [] #(controllers/get-form % ~entity ~schema))
             (GET "/:id" [] #(controllers/get-form % ~entity ~schema))))
 
@@ -28,7 +29,9 @@
   (defcontroller "/expenses" db/expenses db/expense-schema
     :id :quantity :price :description :date)
 
-  ;(GET "/pdf" [] build-pdf-form)
+  (GET "/pdf" [] pdf-form)
+  (POST "/pdf" [] mk-pdf)
+
   (route/resources "/"))
 
 (def app
