@@ -84,7 +84,8 @@
 (defn find-one [entity id]
   (first (->
           (select* entity)
-          (where {:id id}))))
+          (where {:id id})
+          (exec))))
 
 (defn add-to-db [id entity vals]
   "Upsert. If id is nil will create a new entry otherwise will update"
