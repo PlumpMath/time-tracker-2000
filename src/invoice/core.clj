@@ -1,38 +1,34 @@
 (ns invoice.core
   (:use compojure.core [invoice.controllers :as controllers]
         ring.middleware.json ring.util.response
-        [hiccup.middleware :only (wrap-base-url)])
+        [hiccup.middleware :only (wrap-base-url)]
+        [invoice.db :as db])
   (:require [compojure.route :as route]
             [compojure.handler :as handler]))
 
-(defn foo [req & {:as params}]
-  (println (:id (:params req)))
-  (println params)
-  (str "foo"))
+(defmacro defcontroller [n entity schema & fields]
+  `(context ~n []
+            (POST "/" [] #(controllers/post-form % ~entity ~schema))
+            (POST "/:id" [] #(controllers/post-form % ~entity ~schema))
+            (GET "/list" [] #(controllers/get-list % ~entity [~@fields]))
+            (GET "/new" [] #(controllers/get-form % ~entity ~schema))
+            (GET "/:id" [] #(controllers/get-form % ~entity ~schema))))
 
 (defroutes my-routes
   (GET "/" [] dashboard)
 
-  (GET "/members/new" [] controllers/get-members)
-  (GET "/clients/new" [] controllers/get-clients)
-  (GET "/jobs/new" [] controllers/get-jobs)
-  (GET "/expenses/new" [] controllers/get-expenses)
-  (GET "/hours/new" [] controllers/get-hours)
-
-  (POST "/clients" [] controllers/add-clients)
-  (POST "/hours" [] controllers/add-hours)
-  (POST "/jobs" [] controllers/add-jobs)
-  (POST "/members" [] controllers/add-members)
-  (POST "/expenses" [] controllers/add-expenses)
-
-  (GET "/members/:id" [id] controllers/get-members)
-  (GET "/clients/:id" [id] controllers/get-clients)
-  (GET "/jobs/:id" [id] controllers/get-jobs)
-  (GET "/expenses/:id" [id] controllers/get-expenses)
-  (GET "/hours/:id" [id] controllers/get-hours)
+  (defcontroller "/jobs" db/jobs db/job-schema
+    :id :name :description)
+  (defcontroller "/members" db/members db/member-schema
+    :id :name)
+  (defcontroller "/hours" db/hours db/hours-schema
+    :id :hour :rate :date :description)
+  (defcontroller "/clients" db/clients db/client-schema
+    :id :name :email)
+  (defcontroller "/expenses" db/expenses db/expense-schema
+    :id :quantity :price :description :date)
 
   ;(GET "/pdf" [] build-pdf-form)
-
   (route/resources "/"))
 
 (def app

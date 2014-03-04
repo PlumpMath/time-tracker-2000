@@ -6,32 +6,42 @@
   "Creates a title"
   [:h1 n])
 
-(defn overview-table-row [item]
-  [:tr
-   (for [[k v] item] [:td (str v)])
-   [:td
-    [:a {:href (str "/delete")} "X"]]])
+(defn pagination [n page per-page]
+  (let [prev-page (if (= 1 page) nil (- page 1))
+        next-page (+ page 1)]
+    [:ul {:class "pagination"}
+     (if (not (nil? prev-page))
+       [:li
+        [:a {:href (str n "/list?page=" prev-page "&per_page=" per-page)
+             :class "arrow"} "&laquo;"]]
+       [:li
+        [:a {:class "unavailable arrow"} "&laquo;"]])
+     [:li
+      [:a {:href (str n "/list?page=" next-page "&per_page=" per-page)
+           :class "arrow"} "&raquo;"]]]))
 
-(defn overview-table [items]
+(defn overview-table-row [item n]
+  [:tr
+   (for [[k v] item]
+     (if (= k :id)
+       [:td [:a {:href (str n "/" v)} v]]
+       [:td (str v)]))])
+
+(defn overview-table [items n]
   "Builds the table for the dashboard"
   [:table {:style "width:100%"}
    [:thead
     [:tr
-     (for [[k v] (first items)] [:th (name k)])
-     [:td "Delete"]]]
+     (for [[k v] (first items)] [:th (name k)])]]
    [:tbody
-    (map overview-table-row items)]])
+    (map #(overview-table-row % n) items)]])
 
-(defn overview [table]
-  [(keyword (str "div#" (:name table)))
-   (list
-    [:h3 (:name table)]
-    (if (empty? (:results table))
-      [:p "empty"]
-      (list
-       (overview-table (:results table))
-       [:a {:href (str "/" (:name table) "s/list")} "Show more..."]))
-    [:hr])])
+(defn overview [context table]
+  (list [:h3
+         [:a {:href (str context "/list")} context]]
+        (if (empty? table)
+          [:p "empty"]
+          (overview-table table context))))
 
 (def head
   (list [:meta {:name "viewport"
@@ -46,7 +56,7 @@
    [:ul {:class "title-area"}
     [:li {:class "name"}
      [:h1
-      [:a {:href "#"} "Invoice 2000"]]]]
+      [:a {:href "/"} "Time Tracker 2000"]]]]
    [:section {:class "top-bar-section"}
     [:ul {:class "right"}
      [:li {:class "active"}
@@ -54,12 +64,11 @@
      [:li {:class "has-dropdown"}
       [:a {:href "#"} "Add"]
       [:ul {:class "dropdown"}
-       [:li
-        [:a {:href "/members/new"} "Member"]
-        [:a {:href "/clients/new"} "Client"]
-        [:a {:href "/jobs/new"} "Job"]
-        [:a {:href "/expenses/new"} "Expnese"]
-        [:a {:href "/hours/new"} "Hours"]]]]
+       [:li [:a {:href "/members/new"} "Member"]]
+       [:li [:a {:href "/clients/new"} "Client"]]
+       [:li [:a {:href "/jobs/new"} "Job"]]
+       [:li [:a {:href "/expenses/new"} "Expnese"]]
+       [:li [:a {:href "/hours/new"} "Hours"]]]]
      [:li
       [:a {:href "/buid_pdf"} "PDF"]]]]])
 
@@ -97,8 +106,10 @@
    [:div {:class "large-4 columns"}
     [:label n]
     [:select {:name (name k)}
-     (map (fn [option]
-            [:option {:value (:id option)} (:name option)]) options)]]])
+     (map #(if (= (:id %) (first v))
+             [:option {:value (:id %) :selected "selected"} (:name %)]
+             [:option {:value (:id %)} (:name %)])
+          options)]]])
 
 (defn build-form [method action & inputs]
   "Builds a form."

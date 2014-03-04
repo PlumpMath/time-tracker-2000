@@ -5,7 +5,7 @@
 
 (defn schema->entity [schema]
   "Transforms schema into something entity-fields friendly"
-  (into [] (map #(key %) schema)))
+  (into [:id] (map #(key %) schema)))
 
 (defentity members
   (table :members)
@@ -30,6 +30,8 @@
   (table :expenses)
   (database h2-db)
   (has-one jobs {:fk :id}))
+
+(:rel entity-fields expenses)
 
 ;; Schemas for each entity. Used to build crud forms etc
 ;;   type: the type (string, integer, date or relationship)
@@ -64,18 +66,20 @@
    :description {:type :string :name "Description"}
    :job_id {:type :relationship :refers jobs :name "Job"}})
 
-
 (defn find-all [entity l s & args]
   "Entity, limit, skip & fields"
   (->
    (select* entity)
    (limit l)
    (offset s)
-   (#(apply fields % args))
+   (#(apply fields % (flatten args)))
    (exec)))
 
 (defn find-one [entity id]
   (into {} (first ( select entity (where {:id id})))))
 
-(defn add-to-db [entity & {:as vals}]
-  (insert entity (values vals)))
+(defn add-to-db [id entity vals]
+  "Upsert. If id is nil will create a new entry otherwise will update"
+  (if (nil? id)
+    (insert entity (values vals))
+    (update entity (set-fields vals) (where {:id id}))))

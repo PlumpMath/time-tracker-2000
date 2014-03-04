@@ -7,13 +7,15 @@
 (defmigration add-members-table
   (up [] (create
           (tbl :members
-               (varchar :name 200 :unique))))
+               (varchar :name 200 :unique)
+               (timestamp :created_on (default (now))))))
   (down [] (drop (table :members))))
 
 (defmigration add-clients-table
   (up [] (create
           (tbl :clients
                (varchar :name 100 :not-null)
+               (timestamp :created_on (default (now)))
                (varchar :email 100 :not-null)
                (varchar :abn 50)
                (varchar :phone 20)
@@ -25,6 +27,7 @@
   (up [] (create
           (tbl :jobs
                (varchar :name 100)
+               (timestamp :created_on (default (now)))
                (varchar :description 500)
                (refer-to :clients))))
   (down [] (drop (table :jobs))))
@@ -33,6 +36,7 @@
   (up [] (create
           (tbl :hours
                (integer :hour)
+               (timestamp :created_on (default (now)))
                (integer :rate)
                (date :date)
                (varchar :description 500)
@@ -44,6 +48,7 @@
   (up [] (create
           (tbl :expenses
                (integer :price)
+               (timestamp :created_on (default (now)))
                (integer :quantity)
                (varchar :description 500)
                (date :date)

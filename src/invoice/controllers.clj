@@ -1,7 +1,11 @@
 (ns invoice.controllers
   (:use [invoice.db :as db]
         [invoice.views :as views]
-        [clj-time.format :as tf]))
+        [clj-time.format :as tf]
+        [ring.util.response :as response]))
+
+(defmacro get-entity [n]
+  `(eval (symbol (str "db/" ~n))))
 
 (def db-format (tf/formatter "yyyy-MM-dd"))
 (def my-format (tf/formatter "dd/MM/yyyy"))
@@ -15,17 +19,20 @@
   (tf/unparse my-format (tf/parse db-format s)))
 
 (defn str->int [s]
-  (if (nil? s)
-    nil
+  (if (not (nil? s))
     (let [n (read-string s)]
-      (if (number? n) n nil))))
+      (if (number? n) n))))
 
 (defn mk-action [route id]
   (if (nil? id)
     route
     (str route "/" id)))
 
-(defn unparse-value [v t]
+(defn mk-pagination [page per-page]
+  "Creates skip based on page/per-page"
+  (* (- page 1) per-page))
+
+(defn unparse-val [v t]
   "Unparses value based on type"
   (if (nil? v)
     nil
@@ -33,9 +40,7 @@
      (= t :date) (date->str (str v))
      :else v)))
 
-(defn parse-value [v t]
-  (println v)
-  (println t)
+(defn parse-val [v t]
   "Parses value based on type"
   (cond
    (= t :date) (str->date (str v))
@@ -43,116 +48,60 @@
    :else v))
 
 (defn build-crud-form [schema form]
-  "Builds a crud form to add/edit data"
+  "Builds a crud form"
   (map #(do (let [k (key %)
-                  v (val %)]
-              (if (= (:type v) :relationship)
+                  v (val %)
+                  t (:type v)]
+              (if (= t :relationship)
                 (let [foreign (db/find-all (:refers v) -1 0 :id :name)]
                   (views/build-form-select (:name v) k foreign (k form)))
-                (views/build-form-input
-                 (:name v)
-                 k
-                 (unparse-value (k form) (:type v))))))
+                (views/build-form-input (:name v) k (unparse-val (k form) t)))))
        schema))
 
 (defn commit [schema body]
+  "Parses the request body"
   (into {} (map #(let [k (key %)
                        v (val %)]
-                   {k (parse-value (k body) (:type v))}
-                  ) schema)))
+                   {k (parse-val (k body) (:type v))})
+                schema)))
 
 (defn dashboard [req]
-  "Renders the dashboard page"
+  "Renders the index page"
   (views/render
-   (map views/overview
-        [{:name "hours"
-          :results (db/find-all db/hours 10 0 :id :hour :rate :date :description)}
-         {:name "expenses"
-          :results (db/find-all db/expenses 10 0 :id :quantity :price :date :description)}
-         {:name "clients"
-           :results (db/find-all db/clients 10 0 :id :email :name)}
-         {:name "members"
-          :results (db/find-all db/members 10 0 :id :name)}
-         {:name "jobs"
-          :results (db/find-all db/jobs 10 0 :id :name :description)}])))
+   (map #(apply views/overview %)
+        [["/hours" (db/find-all db/hours 10 0 :id :hour :rate :date :description)]
+         ["/expenses" (db/find-all db/expenses 10 0 :id :description :quantity :price :date )]
+         ["/clients" (db/find-all db/clients 10 0 :id :name :email)]
+         ["/members" (db/find-all db/members 10 0 :id :name)]
+         ["/jobs" (db/find-all db/jobs 10 0 :id :name :description)]])))
 
-(defn get-clients [req]
-  "Builds the view for adding new clients"
-  (let [id (:id (:params req))
-        form (db/find-one db/clients id)]
-    (println form)
+(defn get-form [req entity schema]
+  "Builds the view for the given entity"
+  (let [context (:context req)
+        id (:id (:params req))
+        form (db/find-one entity id)]
     (views/render
-     (list (views/title "Add Clients")
+     (list (views/title context)
            (views/build-form
             "post"
-            (mk-action "/clients" id)
-            (build-crud-form db/client-schema form))))))
+            (mk-action context id)
+            (build-crud-form schema form))))))
 
-(defn get-members [req]
-  "Builds the view for adding new members to the team"
-  (let [id (:id (:params req))
-        form (db/find-one db/members id)]
-    (views/render
-     (list (views/title "Add Member")
-           (views/build-form
-            "post"
-            (mk-action "/members" id)
-            (build-crud-form db/member-schema form))))))
-
-(defn get-jobs [req]
-  "Builds the view for adding new members to the team"
-  (let [id (:id (:params req))
-        form (db/find-one db/jobs id)]
-    (views/render
-     (list (views/title "Add Job")
-           (views/build-form
-            "post"
-            (mk-action "/jobs" id)
-            (build-crud-form db/job-schema form))))))
-
-(defn get-expenses [req]
-  "Builds the view for adding expenses to a job"
-  (let [id (:id (:params req))
-        form (db/find-one db/expenses id)]
-    (views/render
-     (list (views/title "Add Expenses")
-           (views/build-form
-            "post"
-            (mk-action "/expenses" id)
-            (build-crud-form db/expense-schema form))))))
-
-(defn get-hours [req]
-  "Constructs the view for logging hours"
-  (let [id (:id (:params req))
-        form (db/find-one db/hours id)]
-    (views/render
-     (list (views/title "Add Hours")
-           (views/build-form
-            "post"
-            (mk-action "/hours" id)
-            (build-crud-form db/hours-schema form))))))
-
-(defn add-hours [req]
-  "Logs new hours to the database"
-  (let [body (:params req)]
-    (db/add-to-db db/hours (commit db/hours-schema body))))
-
-(defn add-clients [req]
-  "Adds a new client to the database"
-  (let [body (:params req)]
-    (db/add-to-db db/clients (commit db/client-schema body))))
-
-(defn add-jobs [req]
-  "Adds a new job to the database"
-  (let [body (:params req)]
-    (db/add-to-db db/jobs (commit db/job-schema body))))
-
-(defn add-members [req]
-  "Adds a new member to the database"
+(defn post-form [req entity schema]
+  "Updates the given entity"
   (let [body (:params req)
-        id (:id body)]
-    (db/add-to-db db/members (commit db/member-schema body))))
+        id (:id body)
+        result (db/add-to-db id entity (commit schema body))]
+    (response/redirect "/")))
 
-(defn add-expenses [req]
-  (let [body (:params req)]
-    (db/add-to-db db/expenses (commit (db/expense-schema body)))))
+(defn get-list [req entity fields]
+  "Lists items for the given entity"
+  (let [context (:context req)
+        page (or (str->int (:page (:params req))) 1)
+        l (or (str->int (:per_page (:params req))) 10)
+        s (mk-pagination page l)
+        results (db/find-all entity l s fields)]
+    (views/render
+     (list
+      (views/overview context results)
+      (views/pagination context page l)))))
