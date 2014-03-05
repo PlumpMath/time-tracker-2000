@@ -11,11 +11,21 @@
   (cond
    (keyword? v) (str "\\" (name v))
    (vector? v) (str "{" (space-out (flatten (map to-latex v))) "}")
-   (string? v) (str "\"" v "\"")))
+   (string? v) v))
 
 (defn % [s] (str "% " s "\n"))
 
-(writelatex :documentclass ["invoice"]
-            :def :tab [:hspace ["3ex"]]
-            :begin ["document"] (% "foo")
-            :hfil [:large :bf "Invoice 133"] :hifil)
+(def newline "\\\\")
+
+(defn hourrow [description hours price]
+  (writelatex :hourrow [(str description)] [(str hours)] [(str price)]))
+
+(defn feerow [description price]
+  (writelatex :feerow [(str description)] [(str price)]))
+
+(defn layout [title]
+  (writelatex
+   :documentclass ["invoice"]
+   :def :tab [:hspace* ["3ex"]]
+   :begin ["document"] (% "foo")
+   :hfil [:large :bf title] :hifil))
