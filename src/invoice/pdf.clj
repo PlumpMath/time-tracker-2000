@@ -4,14 +4,14 @@
 (defn space-out [l]
   (clojure.string/join " " l))
 
-(defn writelatex [& txt]
-  (space-out (map to-latex txt)))
-
 (defn to-latex [v]
   (cond
    (keyword? v) (str "\\" (name v))
    (vector? v) (str "{" (space-out (flatten (map to-latex v))) "}")
    (string? v) v))
+
+(defn writelatex [& txt]
+  (space-out (map to-latex txt)))
 
 (defn % [s] (str "% " s "\n"))
 
@@ -72,3 +72,12 @@
                  (hour-table hours)
                  (expense-table expenses))
           (apply writelatex (map note notes)))))
+
+(defn compile-pdf [latex]
+  (let [dir "resources"
+        f "tmp"]
+    (spit (str dir "/" f ".tex") latex)
+    (let [output (sh "tex2pdf" f)]
+      (if (= (:exit output) 0)
+        (slurp (str dir "/" f ".pdf"))
+        (Error. (:err output))))))
