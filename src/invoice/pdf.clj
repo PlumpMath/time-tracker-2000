@@ -1,14 +1,17 @@
 (ns invoice.pdf
   (:use [clojure.java.shell :only [sh]]))
 
+(defn space-out [l]
+  (clojure.string/join " " l))
+
 (defn writelatex [& txt]
-  (apply str (map to-latex txt)))
+  (space-out (map to-latex txt)))
 
 (defn to-latex [v]
   (cond
    (keyword? v) (str "\\" (name v))
-   (vector? v) (str "{" (apply str (flatten (map to-latex v))) "}")
-   (string? v) (str v)))
+   (vector? v) (str "{" (space-out (flatten (map to-latex v))) "}")
+   (string? v) (str "\"" v "\"")))
 
 (defn % [s] (str "% " s "\n"))
 
