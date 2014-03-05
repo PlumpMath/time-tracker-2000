@@ -17,15 +17,58 @@
 
 (def newline "\\\\")
 
+(def date (writelatex {:bf "Date:" newline :tab :today newline}))
+
+(defn title [t]
+  (writelatex :hifil [:large :bf t] :hifil :bigskip :break :hrule))
+
 (defn hourrow [description hours price]
-  (writelatex :hourrow [(str description)] [(str hours)] [(str price)]))
+  (writelatex :hourrow [description] [(str hours)] [(str price)]))
 
 (defn feerow [description price]
-  (writelatex :feerow [(str description)] [(str price)]))
+  (writelatex :feerow [description] [(str price)]))
 
-(defn layout [title]
+(defn begin [n & opts]
+  (writelatex :begin [n] (apply writelatex opts) :end [n]))
+
+(defn details [t person]
   (writelatex
-   :documentclass ["invoice"]
-   :def :tab [:hspace* ["3ex"]]
-   :begin ["document"] (% "foo")
-   :hfil [:large :bf title] :hifil))
+   [:bf (str t ":")] newline
+   (:name person) newline
+   "ABN:" (:abn person) newline
+   (:address person) newline
+   (:email person) newline))
+
+(defn bank-details [person]
+  (writelatex
+   [:bf "Details for Direct Deposit"] newline
+   :tab [:bf "Bank:"] (:branch person) newline
+   :tab [:bf "BSB:"] (:bsb person) newline
+   :tab [:bf "Account No:"] (:account person) newline
+   :tab [:bf "Account Name:" (:name person) newline]))
+
+(def head (writelatex :documentclass ["invoice"]
+                      :def :tab [:hspace* ["3ex"]]))
+
+(defn hour-table [hours]
+  (writelatex :feetype "Hours Worked" (map hourrow hours)))
+
+(defn expense-table [expenses]
+  (writelatex :feetype "Expenses" (map feerow expenses)))
+
+(defn note [s]
+  (writelatex [:bf s newline]))
+
+(defn layout [t from to hours expenses & notes]
+  (writelatex
+   head
+   (begin "document"
+          (title t)
+          (details "Invoice From" from) newline
+          (bank-details from) newline
+          (details "Invoice To" to) newline
+          date
+          (begin "invoiceTable"
+                 (hour-table hours)
+                 (expense-table expenses))
+          (apply writelatex (map note notes)))))
