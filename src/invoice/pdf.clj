@@ -22,11 +22,16 @@
 (defn title [t]
   (writelatex :hfil [:Large :bf t] :hfil :bigskip :break :hrule))
 
-(defn hourrow [description hours price]
-  (writelatex :hourrow [description] [(str hours)] [(str price)]))
+(defn hourrow [row]
+  (writelatex :hourrow
+              [(:description row)]
+              [(str (:hours row))]
+              [(str (:price row))]))
 
-(defn feerow [description price]
-  (writelatex :feerow [description] [(str price)]))
+(defn feerow [row]
+  (writelatex :feerow
+              [(:description row)]
+              [(str (:price row))]))
 
 (defn begin [n & opts]
   (writelatex :begin [n] (apply writelatex opts) :end [n]))
@@ -54,10 +59,10 @@
                     :def :tab [:hspace* ["3ex"]]))
 
 (defn hour-table [hours]
-  (writelatex :feetype "Hours Worked" (map hourrow hours)))
+  (writelatex :feetype "Hours Worked" (apply writelatex (map hourrow hours))))
 
 (defn expense-table [expenses]
-  (writelatex :feetype "Expenses" (map feerow expenses)))
+  (writelatex :feetype "Expenses" (apply writelatex (map feerow expenses))))
 
 (defn note [s]
   (writelatex [:bf s newline]))
