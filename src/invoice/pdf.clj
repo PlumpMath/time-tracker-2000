@@ -80,8 +80,7 @@
   (let [dir "resources"
         f "tmp"]
     (spit (str dir "/" f ".tex") tex)
-    (let [output (sh "pdflatex" (str f ".tex"))]
-      (println output)
+    (let [output (sh "pdflatex" (str f ".tex") :dir dir)]
       (if (= (:exit output) 0)
         (slurp (str dir "/" f ".pdf"))
         (throw (Throwable. (:err output)))))))
