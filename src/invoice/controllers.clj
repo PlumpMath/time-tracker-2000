@@ -1,6 +1,8 @@
 (ns invoice.controllers
+  (:import (java.io FileInputStream))
   (:use [invoice.db :as db]
         [invoice.views :as views]
+        [invoice.pdf :as pdf :only [layout compile-pdf]]
         [clj-time.format :as tf]
         [ring.util.response :as response]))
 
@@ -114,5 +116,10 @@
 
 (defn mk-pdf [req]
   (let [body (:params req)
-        member (db/find-one db/members (:member_id body))]
-    (str body)))
+        member (db/find-one db/members (:member_id body))
+        client (db/find-one db/clients (:client_id body))
+        tex (pdf/layout "Invoice Foo" member client [] [])
+        pdf-path (pdf/compile-pdf tex)]
+    {:status 200
+     :headers {:content-type "application/pdf"}
+     :body (FileInputStream. pdf-path)}))
