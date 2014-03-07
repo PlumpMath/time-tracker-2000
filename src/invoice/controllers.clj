@@ -1,6 +1,7 @@
 (ns invoice.controllers
   (:use [invoice.db :as db]
         [invoice.views :as views]
+        [invoice.pdf :as pdf :only [layout compile-pdf]]
         [clj-time.format :as tf]
         [ring.util.response :as response]))
 
@@ -114,5 +115,10 @@
 
 (defn mk-pdf [req]
   (let [body (:params req)
-        member (db/find-one db/members (:member_id body))]
-    (str body)))
+        member (db/find-one db/members (:member_id body))
+        client (db/find-one db/clients (:client_id body))
+        tex (pdf/layout "Invoice blah" member client [] [])
+        binary (pdf/compile-pdf tex)]
+    (response/header
+     (response/response binary)
+     "Content-Type" "application/pdf")))
