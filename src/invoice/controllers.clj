@@ -1,4 +1,5 @@
 (ns invoice.controllers
+  (:import (java.io FileInputStream))
   (:use [invoice.db :as db]
         [invoice.views :as views]
         [invoice.pdf :as pdf :only [layout compile-pdf]]
@@ -117,8 +118,8 @@
   (let [body (:params req)
         member (db/find-one db/members (:member_id body))
         client (db/find-one db/clients (:client_id body))
-        tex (pdf/layout "Invoice blah" member client [] [])
-        binary (pdf/compile-pdf tex)]
-    (response/header
-     (response/response binary)
-     "Content-Type" "application/pdf")))
+        tex (pdf/layout "Invoice Foo" member client [] [])
+        pdf-path (pdf/compile-pdf tex)]
+    {:status 200
+     :headers {:content-type "application/pdf"}
+     :body (FileInputStream. pdf-path)}))

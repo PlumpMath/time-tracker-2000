@@ -68,6 +68,7 @@
   (writelatex [:bf s newline]))
 
 (defn layout [t from to hours expenses & notes]
+  "Generates the latex code for the invoice"
   (writelatex
    document-head
    (begin "document"
@@ -82,10 +83,11 @@
           (apply writelatex (map note notes)))))
 
 (defn compile-pdf [tex]
+  "Runs pdflatex against a tex file. Returns path to pdf"
   (let [dir "resources"
         f "tmp"]
     (spit (str dir "/" f ".tex") tex)
     (let [output (sh "pdflatex" (str f ".tex") :dir dir)]
       (if (= (:exit output) 0)
-        (slurp (str dir "/" f ".pdf"))
+        (str dir "/" f ".pdf")
         (throw (Throwable. (:err output)))))))
