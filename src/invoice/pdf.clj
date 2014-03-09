@@ -43,7 +43,7 @@
    :tab [:bf "ABN:"] (:abn person) newline
    :tab [:bf "Address:"] (:address person) newline
    :tab [:bf "Email:"] (:email person) newline
-   :tab [:bg "Phone Number:"] (:phone person) newline newline))
+   :tab [:bf "Phone Number:"] (:phone person) newline newline))
 
 (defn bank-details [person]
   (writelatex
@@ -59,10 +59,10 @@
                     :def :tab [:hspace* ["3ex"]]))
 
 (defn hour-table [hours]
-  (writelatex :feetype "Hours Worked" (apply writelatex (map hourrow hours))))
+  (writelatex :feetype ["Hours Worked"] (apply writelatex (map hourrow hours))))
 
 (defn expense-table [expenses]
-  (writelatex :feetype "Expenses" (apply writelatex (map feerow expenses))))
+  (writelatex :feetype ["Expenses"] (apply writelatex (map feerow expenses))))
 
 (defn note [s]
   (writelatex [:bf s newline]))
@@ -88,6 +88,7 @@
         f "tmp"]
     (spit (str dir "/" f ".tex") tex)
     (let [output (sh "pdflatex" (str f ".tex") :dir dir)]
+      (println output)
       (if (= (:exit output) 0)
         (str dir "/" f ".pdf")
         (throw (Throwable. (:err output)))))))
