@@ -40,6 +40,7 @@
    :email {:type :string :name "Email"}
    :address {:type :string :name "Address"}
    :abn {:type :string :name "ABN"}
+   :bank_name {:type :string :name "Account Name"}
    :bank_branch {:type :string :name "Bank"}
    :bank_bsb {:type :string :name "Account BSB"}
    :bank_number {:type :string :name "Account Number"}})
@@ -71,14 +72,14 @@
    :date {:type :date :name "Date"}
    :job_id {:type :relationship :refers jobs :name "Job"}})
 
-(defn find-all [entity l s & args]
+(defn find-all [entity l s & opts]
   "Entity, limit, skip & fields"
   (->
    (select* entity)
    (limit l)
    (offset s)
    (order :created_on :DESC)
-   (#(apply fields % (flatten args)))
+   (#(apply fields % (flatten opts)))
    (exec)))
 
 (defn find-one [entity id]

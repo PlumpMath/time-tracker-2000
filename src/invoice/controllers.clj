@@ -1,10 +1,10 @@
 (ns invoice.controllers
-  (:import (java.io FileInputStream))
   (:use [invoice.db :as db]
         [invoice.views :as views]
         [invoice.pdf :as pdf :only [layout compile-pdf]]
         [clj-time.format :as tf]
-        [ring.util.response :as response]))
+        [ring.util.response :as response]
+        (korma db core)))
 
 (defmacro get-entity [n]
   `(eval (symbol (str "db/" ~n))))
@@ -116,10 +116,24 @@
 
 (defn mk-pdf [req]
   (let [body (:params req)
+        title (:title body)
+        date-from (str->date (:from body))
+        date-to (str->date (:to body))
         member (db/find-one db/members (:member_id body))
-        client (db/find-one db/clients (:client_id body))
-        tex (pdf/layout "Invoice Foo" member client [] [])
+        job (db/find-one db/jobs (:job_id body))
+        client (db/find-one db/clients (:client_id job))
+        hours (select db/hours
+                      (order :date :DESC)
+                      (where (and (<= :date date-to)
+                                  (>= :date date-from)
+                                  (= :job_id (:id job)))))
+        expenses (select db/expenses
+                         (order :date :DESC)
+                         (where (and (<= :date date-to)
+                                     (>= :date date-from)
+                                     (= :job_id (:id job)))))
+        tex (pdf/layout title member client hours expenses)
         pdf-path (pdf/compile-pdf tex)]
     {:status 200
-     :headers {:content-type "application/pdf"}
-     :body (FileInputStream. pdf-path)}))
+     :headers {"Content-Type" "application/pdf"}
+     :body (clojure.java.io/input-stream pdf-path)}))

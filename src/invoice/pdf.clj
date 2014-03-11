@@ -17,21 +17,23 @@
 
 (def newline "\\\\")
 
-(def date (writelatex {:bf "Date:" newline :tab :today newline}))
+(def date (writelatex [:bf "Date Invoiced:"] newline :tab :today newline))
 
 (defn title [t]
   (writelatex :hfil [:Large :bf t] :hfil :bigskip :break :hrule))
 
 (defn hourrow [row]
-  (writelatex :hourrow
-              [(:description row)]
-              [(str (:hours row))]
-              [(str (:price row))]))
+  (let [description (str (:date row) ": " (:description row))]
+    (writelatex :hourrow
+                [description]
+                [(str (:hour row))]
+                [(str (:rate row))])))
 
 (defn feerow [row]
-  (writelatex :feerow
-              [(:description row)]
-              [(str (:price row))]))
+  (let [description (str (:date row) ": " (:description row))]
+    (writelatex :feerow
+                [description]
+                [(str (:price row))])))
 
 (defn begin [n & opts]
   (writelatex :begin [n] (apply writelatex opts) :end [n]))
@@ -40,10 +42,11 @@
   (writelatex
    [:bf (str t ":")] newline
    :tab [:bf "Name:"] (:name person) newline
+   (if (not (nil? (:title person)))
+     (writelatex :tab [:bf "Company:"] (:title person) newline))
    :tab [:bf "ABN:"] (:abn person) newline
    :tab [:bf "Address:"] (:address person) newline
-   :tab [:bf "Email:"] (:email person) newline
-   :tab [:bf "Phone Number:"] (:phone person) newline newline))
+   :tab [:bf "Email:"] (:email person) newline))
 
 (defn bank-details [person]
   (writelatex
@@ -76,7 +79,7 @@
           (details "Invoice From" from)
           (bank-details from)
           (details "Invoice To" to)
-          date
+          (str date)
           (begin "invoiceTable"
                  (hour-table hours)
                  (expense-table expenses))
@@ -88,7 +91,6 @@
         f "tmp"]
     (spit (str dir "/" f ".tex") tex)
     (let [output (sh "pdflatex" (str f ".tex") :dir dir)]
-      (println output)
       (if (= (:exit output) 0)
         (str dir "/" f ".pdf")
         (throw (Throwable. (:err output)))))))
