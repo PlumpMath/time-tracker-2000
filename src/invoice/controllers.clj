@@ -123,12 +123,12 @@
         job (db/find-one db/jobs (:job_id body))
         client (db/find-one db/clients (:client_id job))
         hours (select db/hours
-                      (order :date :DESC)
+                      (order :date :ASC)
                       (where (and (<= :date date-to)
                                   (>= :date date-from)
                                   (= :job_id (:id job)))))
         expenses (select db/expenses
-                         (order :date :DESC)
+                         (order :date :ASC)
                          (where (and (<= :date date-to)
                                      (>= :date date-from)
                                      (= :job_id (:id job)))))

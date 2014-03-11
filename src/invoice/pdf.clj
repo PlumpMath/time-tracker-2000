@@ -46,7 +46,7 @@
      (writelatex :tab [:bf "Company:"] (:title person) newline))
    :tab [:bf "ABN:"] (:abn person) newline
    :tab [:bf "Address:"] (:address person) newline
-   :tab [:bf "Email:"] (:email person) newline))
+   :tab [:bf "Email:"] (:email person) newline newline))
 
 (defn bank-details [person]
   (writelatex
