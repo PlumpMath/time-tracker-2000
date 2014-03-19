@@ -6,8 +6,8 @@
   (:require [compojure.route :as route]
             [compojure.handler :as handler]))
 
-(defmacro defcontroller [n entity schema & fields]
-  "Builds the routes for some crud"
+(defmacro defcontroller
+  "Builds the routes for some crud" [n entity schema & fields]
   `(context ~n []
             (POST "/" [] #(controllers/post-form % ~entity ~schema))
             (POST "/:id" [] #(controllers/post-form % ~entity ~schema))

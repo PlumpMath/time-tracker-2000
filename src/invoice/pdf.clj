@@ -70,8 +70,9 @@
 (defn note [s]
   (writelatex [:bf s newline]))
 
-(defn layout [t from to hours expenses & notes]
+(defn layout
   "Generates the latex code for the invoice"
+  [t from to hours expenses & notes]
   (writelatex
    document-head
    (begin "document"
@@ -85,8 +86,9 @@
                  (expense-table expenses))
           (apply writelatex (map note notes)))))
 
-(defn compile-pdf [tex]
+(defn compile-pdf
   "Runs pdflatex against a tex file. Returns path to pdf"
+  [tex]
   (let [dir "resources"
         f "tmp"]
     (spit (str dir "/" f ".tex") tex)

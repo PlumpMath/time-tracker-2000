@@ -12,12 +12,12 @@
 (def db-format (tf/formatter "yyyy-MM-dd"))
 (def my-format (tf/formatter "dd/MM/yyyy"))
 
-(defn str->date [s]
-  "Converts DD/MM/YYYY to parsed date string"
+(defn str->date
+  "Converts DD/MM/YYYY to parsed date string" [s]
   (tf/unparse db-format (tf/parse my-format s)))
 
-(defn date->str [s]
-  "Converts db date string to DD/MM/YYYY"
+(defn date->str
+  "Converts db date string to DD/MM/YYYY" [s]
   (tf/unparse my-format (tf/parse db-format s)))
 
 (defn str->int [s]
@@ -30,27 +30,27 @@
     route
     (str route "/" id)))
 
-(defn mk-pagination [page per-page]
-  "Creates skip based on page/per-page"
+(defn mk-pagination
+  "Creates skip based on page/per-page" [page per-page]
   (* (- page 1) per-page))
 
-(defn unparse-val [v t]
-  "Unparses value based on type"
+(defn unparse-val
+  "Unparses value based on type" [v t]
   (if (nil? v)
     nil
     (cond
      (= t :date) (date->str (str v))
      :else v)))
 
-(defn parse-val [v t]
-  "Parses value based on type"
+(defn parse-val
+  "Parses value based on type" [v t]
   (cond
    (= t :date) (str->date (str v))
    (= t :integer) (str->int v)
    :else v))
 
-(defn build-crud-form [schema form]
-  "Builds a crud form"
+(defn build-crud-form
+  "Builds a crud form" [schema form]
   (map #(do (let [k (key %)
                   v (val %)
                   t (:type v)]
@@ -60,25 +60,30 @@
                 (views/build-form-input (:name v) k (unparse-val (k form) t)))))
        schema))
 
-(defn commit [schema body]
-  "Parses the request body"
+(defn commit
+  "Parses the request body" [schema body]
   (into {} (map #(let [k (key %)
                        v (val %)]
                    {k (parse-val (k body) (:type v))})
                 schema)))
 
-(defn dashboard [req]
-  "Renders the index page"
+(defn dashboard
+  "Renders the index page" [req]
   (views/render
    (map #(apply views/overview %)
-        [["/hours" (db/find-all db/hours 10 0 :id :hour :rate :date :description)]
-         ["/expenses" (db/find-all db/expenses 10 0 :id :description :quantity :price :date )]
-         ["/clients" (db/find-all db/clients 10 0 :id :name :email)]
-         ["/members" (db/find-all db/members 10 0 :id :name)]
-         ["/jobs" (db/find-all db/jobs 10 0 :id :name :description)]])))
+        [["/hours" (db/find-all db/hours 10 0
+                                :id :hour :rate :date :description)]
+         ["/expenses" (db/find-all db/expenses 10 0
+                                   :id :description :quantity :price :date )]
+         ["/clients" (db/find-all db/clients 10 0
+                                  :id :name :email)]
+         ["/members" (db/find-all db/members 10 0
+                                  :id :name)]
+         ["/jobs" (db/find-all db/jobs 10 0
+                               :id :name :description)]])))
 
-(defn get-form [req entity schema]
-  "Builds the view for the given entity"
+(defn get-form
+  "Builds the view for the given entity" [req entity schema]
   (let [context (:context req)
         id (:id (:params req))
         form (db/find-one entity id)]
@@ -89,15 +94,15 @@
             (mk-action context id)
             (build-crud-form schema form))))))
 
-(defn post-form [req entity schema]
-  "Updates the given entity"
+(defn post-form
+  "Updates the given entity" [req entity schema]
   (let [body (:params req)
         id (:id body)
         result (db/add-to-db id entity (commit schema body))]
     (response/redirect "/")))
 
-(defn get-list [req entity fields]
-  "Lists items for the given entity"
+(defn get-list
+  "Lists items for the given entity" [req entity fields]
   (let [context (:context req)
         page (or (str->int (:page (:params req))) 1)
         l (or (str->int (:per_page (:params req))) 10)

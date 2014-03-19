@@ -3,8 +3,8 @@
 
 (def h2-db (h2 {:db "resources/invoice.db"}))
 
-(defn schema->entity [schema]
-  "Transforms schema into something entity-fields friendly"
+(defn schema->entity
+  "Transforms schema into something entity-fields friendly" [schema]
   (into [:id] (map #(key %) schema)))
 
 (defentity members
@@ -88,8 +88,9 @@
           (where {:id id})
           (exec))))
 
-(defn add-to-db [id entity vals]
+(defn add-to-db
   "Upsert. If id is nil will create a new entry otherwise will update"
+  [id entity vals]
   (if (nil? id)
     (insert entity (values vals))
     (update entity (set-fields vals) (where {:id id}))))
